@@ -9,7 +9,7 @@ def load_train_data(feature_type):
     data = {}
 
     # load labels
-    with open('corevo/class_train.tsv') as rf:
+    with open('corevo/raw/class_train.tsv') as rf:
         reader = csv.reader(rf, delimiter='\t')
         for utt, label in reader:
             data[utt] = {}
@@ -17,7 +17,7 @@ def load_train_data(feature_type):
 
     # load features
     for data_name in ['train0', 'train1']:
-        filepath = os.path.join('corevo/features', feature_type, data_name)
+        filepath = os.path.join('corevo/raw/features', feature_type, data_name)
         matdata = scipy.io.loadmat(filepath, squeeze_me=True)
 
         for key in matdata.keys():
@@ -30,7 +30,7 @@ def load_test_data(feature_type):
     data = {}
 
     # load features
-    filepath = os.path.join('corevo/features', feature_type, 'test')
+    filepath = os.path.join('corevo/raw/features', feature_type, 'test')
     matdata = scipy.io.loadmat(filepath, squeeze_me=True)
 
     for key in matdata.keys():
