@@ -2,7 +2,7 @@ import os
 import csv
 
 import numpy as np
-import scipy.io
+from scipy.io import loadmat, wavfile
 
 
 def load_train_data(feature_type):
@@ -18,7 +18,7 @@ def load_train_data(feature_type):
     # load features
     for data_name in ['train0', 'train1']:
         filepath = os.path.join('corevo/features', feature_type, data_name)
-        matdata = scipy.io.loadmat(filepath, squeeze_me=True)
+        matdata = loadmat(filepath, squeeze_me=True)
 
         for key in matdata.keys():
             if key[0] != '_': # is not a special attribute
@@ -31,7 +31,7 @@ def load_test_data(feature_type):
 
     # load features
     filepath = os.path.join('corevo/features', feature_type, 'test')
-    matdata = scipy.io.loadmat(filepath, squeeze_me=True)
+    matdata = loadmat(filepath, squeeze_me=True)
 
     for key in matdata.keys():
         if key[0] != '_': # is not a special attribute
@@ -39,6 +39,18 @@ def load_test_data(feature_type):
             data[key[1:]]['features'] = matdata[key]['features'].item()
 
     return data
+
+def load_wav(data_name):
+    try:
+        fs, data = wavfile.read('corevo/raw/train0/{}.wav'.format(data_name))
+    except FileNotFoundError:
+        try:
+            fs, data = wavfile.read('corevo/raw/train1/{}.wav'.format(data_name))
+        except FileNotFoundError:
+            print('file {}.wav not found'.format(f_name))
+            return -1
+    
+    return np.array(data)
 
 if __name__ == '__main__':
     data = load_train_data('mfcc')
