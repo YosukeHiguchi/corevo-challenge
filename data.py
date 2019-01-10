@@ -40,17 +40,27 @@ def load_test_data(feature_type):
 
     return data
 
-def load_wav(data_name):
+def load_wav(f_name):
+    '''
+    Loads wav file as list
+    
+    Returns:
+    fs: int
+        sampling frequency
+    
+    data: list
+        wav data
+    '''
     try:
-        fs, data = wavfile.read('corevo/raw/train0/{}.wav'.format(data_name))
+        fs, data = wavfile.read('corevo/raw/train0/{}.wav'.format(f_name))
     except FileNotFoundError:
         try:
-            fs, data = wavfile.read('corevo/raw/train1/{}.wav'.format(data_name))
+            fs, data = wavfile.read('corevo/raw/train1/{}.wav'.format(f_name))
         except FileNotFoundError:
             print('file {}.wav not found'.format(f_name))
             return -1
     
-    return np.array(data)
+    return fs, data
 
 if __name__ == '__main__':
     data = load_train_data('mfcc')
