@@ -62,6 +62,42 @@ def load_wav(f_name):
     
     return fs, data
 
+def apply_vad(x, seglen, r=200):
+    offset = int(r / 2)
+
+    feat = np.array(x[:, -3]) # voice active range by pitch
+    feat_pad = np.pad(feat, (offset, offset), 'constant')
+    mean = np.zeros_like(feat)
+    diff = np.zeros_like(feat)
+
+    for i in range(offset, feat.shape[0] + offset):
+        mean[i - offset] = np.mean(feat_pad[i - offset: i + offset])
+
+    for i in range(0, feat.shape[0] - 1):
+        diff[i] = mean[i + 1] - mean[i]
+
+    st = np.argmin(diff)
+
+    return x[st: min(st + 512, feat.shape[0])]
+
+def get_data_with_seglen(data_type, feature_type, seglen):
+    if data_type == 'train':
+        data = load_train_data(feature_type)
+    elif data_type == 'test':
+        data = load_test_data(feature_type)
+
+    for key in data.keys():
+        uttlen = data[key]['features'].shape[0]
+
+        if uttlen > 512:
+            data[key]['features'] = apply_vad(data[key]['features'], seglen)
+            uttlen = data[key]['features'].shape[0]
+
+        if uttlen < 512:
+            data[key]['features'] = np.tile(data[key]['features'], (int(seglen / uttlen) + 1, 1))[0: 512]
+
+    return data
+
 if __name__ == '__main__':
     data = load_train_data('mfcc')
     # load_test_data('mfcc')
